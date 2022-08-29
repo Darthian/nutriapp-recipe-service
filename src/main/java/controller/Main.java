@@ -5,7 +5,6 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.google.gson.Gson;
 import controller.daos.RecipeDaoImpl;
 import controller.service.RecipeService;
 import controller.service.RecipeServiceImpl;
@@ -37,7 +36,8 @@ public class Main implements RequestHandler<APIGatewayProxyRequestEvent, APIGate
           recipeService.createRecipe(input.getBody());
           break;
         case "GET":
-          output = recipeService.getRecipesByName(input.getQueryStringParameters().get("name"));
+          String nameParameter = input.getQueryStringParameters().get("name");
+          output = recipeService.getRecipesByName(nameParameter);
           break;
       }
 

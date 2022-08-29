@@ -5,7 +5,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import controller.entities.RecipeEntity;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RecipeDaoImpl implements RecipeDao {
 
@@ -71,12 +72,16 @@ public class RecipeDaoImpl implements RecipeDao {
 
   @Override
   public List<RecipeEntity> gerRecipesByName(String name) {
+    logger.log("nameParameter:" + name);
     Map<String, AttributeValue> eav = new HashMap<>();
-    eav.put(":nameRecipe", new AttributeValue().withS(name));
-
-    DynamoDBQueryExpression<RecipeEntity> queryExpression = new DynamoDBQueryExpression<RecipeEntity>()
-        .withKeyConditionExpression("nameRecipe contains :nameRecipe").withExpressionAttributeValues(eav);
-
-    return mapper.query(RecipeEntity.class, queryExpression);
+    eav.put(":filterName", new AttributeValue().withS(name));
+    logger.log(eav.entrySet().stream().map(x -> x.getKey() + "," + x.getValue()).collect(Collectors.joining(",")));
+    DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+        .withFilterExpression("nameRecipe contains :filterName").withExpressionAttributeValues(eav);
+    logger.log(scanExpression.getFilterExpression());
+    logger.log(scanExpression.getExpressionAttributeValues().entrySet().stream().map(x -> x.getKey() + "," + x.getValue()).collect(Collectors.joining(",")));
+    List<RecipeEntity> resultSet = mapper.scan(RecipeEntity.class, scanExpression);
+    logger.log("Number of results: " + resultSet.size());
+    return resultSet;
   }
 }

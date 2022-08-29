@@ -1,16 +1,13 @@
 package controller.service;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
 import controller.daos.RecipeDao;
-import controller.daos.RecipeDaoImpl;
 import controller.entities.RecipeEntity;
 import controller.requestModel.RecipeSchema;
 import utils.Mapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RecipeServiceImpl implements RecipeService {
 
@@ -26,7 +23,6 @@ public class RecipeServiceImpl implements RecipeService {
 
   public void createRecipe(String body) {
     RecipeSchema recipeSchema = Mapper.getRecipeSchema(body);
-    logger.log("Recipe: " + recipeSchema);
     recipeDao.createRecipe(recipeSchema);
   }
 
