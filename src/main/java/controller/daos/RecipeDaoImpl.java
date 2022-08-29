@@ -11,22 +11,33 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import controller.entities.RecipeEntity;
 import controller.requestModel.RecipeSchema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class RecipeDaoImpl implements RecipeDao {
-  static AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-  DynamoDBMapper mapper = new DynamoDBMapper(client);
 
-  public void createRecipe(RecipeSchema recipe, LambdaLogger logger) {
-    Map<String, String> ingredientsMap = new HashMap<>();
+  private LambdaLogger logger;
+  private static AmazonDynamoDB client;
+  private DynamoDBMapper mapper;
+
+  public RecipeDaoImpl(LambdaLogger logger) {
+    this.logger = logger;
+    client = AmazonDynamoDBClientBuilder.standard().build();
+    mapper = new DynamoDBMapper(client);
+  }
+
+  public void createRecipe(RecipeSchema recipe) {
+    List<Map<String, String>> ingredients = new ArrayList<>();
     recipe.getIngredients().stream().forEach(i -> {
-      ingredientsMap.put("idProduct", i.getIdProduct());
-      ingredientsMap.put("quantity", i.getQuantity());
-      ingredientsMap.put("unityMeasure", i.getUnityMeasure());
-      ingredientsMap.put("measure", String.valueOf(i.getMeasure()));
-      ingredientsMap.put("imageUrl", i.getImageUrl());
+      Map<String, String> ingredientMap = new HashMap<>();
+      ingredientMap.put("idProduct", i.getIdProduct());
+      ingredientMap.put("quantity", i.getQuantity());
+      ingredientMap.put("unityMeasure", i.getUnityMeasure());
+      ingredientMap.put("measure", String.valueOf(i.getMeasure()));
+      ingredientMap.put("imageUrl", i.getImageUrl());
+      ingredients.add(ingredientMap);
     });
     try {
       RecipeEntity recipeEntity = new RecipeEntity();
@@ -37,7 +48,7 @@ public class RecipeDaoImpl implements RecipeDao {
       recipeEntity.setDescription(recipe.getDescription());
       recipeEntity.setImageUrl(recipe.getImageUrl());
       recipeEntity.setTags(recipe.getTags());
-      recipeEntity.setIngredients(ingredientsMap);
+      recipeEntity.setIngredients(ingredients);
       logger.log("Recipe Entity: " + recipeEntity);
       logger.log("Gonna save the data");
       mapper.save(recipeEntity);
@@ -59,7 +70,7 @@ public class RecipeDaoImpl implements RecipeDao {
   }
 
   @Override
-  public List<RecipeEntity> gerRecipesByName(String name, LambdaLogger logger) {
+  public List<RecipeEntity> gerRecipesByName(String name) {
     Map<String, AttributeValue> eav = new HashMap<>();
     eav.put(":nameRecipe", new AttributeValue().withS(name));
 

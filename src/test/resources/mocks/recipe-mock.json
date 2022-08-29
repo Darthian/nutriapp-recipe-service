@@ -1,0 +1,19 @@
+{
+  "idRecipe": "test",
+  "nameRecipe": "testName",
+  "timeForPreparation": "20 minutos",
+  "portions": 2,
+  "totalIngredients": 4,
+  "description": "testDescription",
+  "imageUrl": "addressToSomeImageResource",
+  "tags": [
+    "rapido",
+    "barato"
+  ],
+  "ingredients": [
+    {
+      "idProduct": 1234,
+      "unityMeasure": "kilo"
+    }
+  ]
+}
